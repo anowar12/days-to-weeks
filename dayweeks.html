@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Time Converter</title>
+<style>
+    #daysConverter {
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+
+    label, input, select, button, .result, .info {
+        display: block;
+        margin-bottom: 10px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    input, select {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    button {
+        padding: 10px;
+        background-color: #066d7d;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    button:hover {
+        background-color: #12a9db;
+    }
+
+    .result {
+        padding: 10px;
+        background-color: white;
+        border: 1px solid #353535;
+        border-radius: 5px;
+        font-size: 26px;
+        color: #090dc9;
+    }
+
+    .info {
+        padding: 10px;
+        background-color: white;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: white;
+        font-weight: bold;
+    }
+    #H {
+     margin: 5px;
+     padding: 5px;
+    }
+</style>
+</head>
+<body>
+<div id="daysConverter">
+    <label for="numberOfUnits">Number of Days 400:</label>
+    <input type="number" id="numberOfUnits" value="400" required>
+    
+    <label for="timeUnit">Time Unit: Days</label>
+    <select id="timeUnit">
+        <option value="hours">Hours</option>
+        <option value="days" selected>Days</option>
+        <option value="weeks">Weeks</option>
+        <option value="months">Months</option>
+    </select>
+    
+    <button onclick="calculate()">Calculate</button>
+    <div class="result" id="result"></div>
+    <div id="calculationDetails"></div>
+    <h3 id="H">How to use the time converter?</h3>
+    <div class="info" id="info">    
+        It's very simple, just enter the number of units in the input field, select the time unit, and click "Calculate" to see the equivalent in years, months, weeks, and days.
+    </div>
+</div>
+
+<script>
+    function isLeapYear(year) {
+        return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+    }
+
+    function calculate() {
+        var numberOfUnits = parseInt(document.getElementById("numberOfUnits").value);
+        var timeUnit = document.getElementById("timeUnit").value;
+
+        var multiplier;
+
+        switch (timeUnit) {
+            case 'hours':
+                multiplier = 1 / 24;
+                break;
+            case 'days':
+                multiplier = 1;
+                break;
+            case 'weeks':
+                multiplier = 7;
+                break;
+            case 'months':
+                multiplier = 30.44; 
+                break;
+            default:
+                multiplier = 1;
+        }
+
+        var numberOfDays = numberOfUnits * multiplier;
+
+        var currentDate = new Date();
+        var targetDate = new Date(currentDate.getTime() + numberOfDays * 24 * 60 * 60 * 1000);
+
+        var years = targetDate.getFullYear() - currentDate.getFullYear();
+        var months = targetDate.getMonth() - currentDate.getMonth();
+        var days = targetDate.getDate() - currentDate.getDate();
+
+        if (days < 0) {
+            months--;
+            var previousMonth = new Date(targetDate.getFullYear(), targetDate.getMonth(), 0);
+            days += previousMonth.getDate();
+        }
+
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        var totalYears = numberOfDays / 365.25;
+        var remainingDays = numberOfDays % 365.25;
+
+        var months = Math.floor(remainingDays / 30.44);
+        remainingDays = remainingDays % 30.44;
+        var weeks = Math.floor(remainingDays / 7);
+        var days = Math.floor(remainingDays % 7);
+
+        var resultText = `${years} years, ${months} months, ${weeks} weeks, and ${days} days.`;
+        var yearText = `Or ${totalYears.toFixed(4)} years.`;
+        var calculationDetailsText = `
+            <table>
+                <tr>
+                    <th>Start Date</th>
+                    <td>${currentDate.toDateString()}</td>
+                </tr>
+                <tr>
+                    <th>Total Days</th>
+                    <td>${numberOfDays.toFixed(2)} days</td>
+                </tr>
+                <tr>
+                    <th>Equivalent</th>
+                    <td>${years} years, ${months} months, ${weeks} weeks, ${days} days</td>
+                </tr>
+                <tr>
+                    <th>Decimal Years</th>
+                    <td>${totalYears.toFixed(4)} years</td>
+                </tr>
+            </table>
+        `;
+
+        var breakdownText = `
+            <h3>Breakdown of Calculation:</h3>
+            <p>
+                Starting from today (${currentDate.toDateString()}), we add ${numberOfDays.toFixed(2)} days. This breaks down into:
+                <ul>
+                    <li>${years} year(s)</li>
+                    <li>${months} month(s)</li>
+                    <li>${weeks} week(s)</li>
+                    <li>${days} day(s)</li>
+                </ul>
+                This calculation takes into account the different number of days in each month and leap years.
+            </p>
+        `;
+
+        document.getElementById("result").innerHTML = `${resultText}<br>${yearText}`;
+        document.getElementById("calculationDetails").innerHTML = calculationDetailsText + breakdownText;
+    }
+
+    window.onload = calculate;
+</script>
+</body>
+</html>
